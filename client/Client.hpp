@@ -25,6 +25,7 @@ namespace Client
             unsigned int GetTileW() const;
             unsigned int GetTileH() const;
             float GetZoom() const;
+            Screen& GetScreen();
         private:
             bool _Init(int ac, char** av);
             void _Deinit();

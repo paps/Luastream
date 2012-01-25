@@ -31,6 +31,11 @@ namespace Client
         return boost::exit_success;
     }
 
+    Screen& Client::GetScreen()
+    {
+        return *this->_screen;
+    }
+
     void Client::_ProcessEvents()
     {
         sf::Event e;

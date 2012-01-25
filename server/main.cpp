@@ -1,6 +1,8 @@
 #include <boost/cstdlib.hpp>
+#include "Server.hpp"
 
-int main(int, char**)
+int main(int ac, char** av)
 {
-    return boost::exit_success;
+    Server::Server s;
+    return s.Run(ac, av);
 }

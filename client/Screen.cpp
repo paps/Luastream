@@ -1,6 +1,7 @@
 #include "Screen.hpp"
 #include "Client.hpp"
 #include "common/Tile.hpp"
+#include "common/Packet.hpp"
 
 namespace Client
 {
@@ -18,6 +19,18 @@ namespace Client
     {
         delete this->_sprite;
         delete this->_rect;
+    }
+
+    void Screen::ProcessTilePacket(Common::Packet& p)
+    {
+        while (p.BytesLeft())
+        {
+            unsigned int x = p.ReadByte();
+            unsigned int y = p.ReadByte();
+            unsigned char type = p.ReadByte();
+            unsigned char color = p.ReadByte();
+            this->DrawTile(x, y, type, Common::Color::ReadFgColor(color), Common::Color::ReadBgColor(color));
+        }
     }
 
     void Screen::DrawText(unsigned int line, std::string const& text, Common::Color::Color fg, Common::Color::Color bg)

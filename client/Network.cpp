@@ -1,13 +1,28 @@
 #include <boost/bind.hpp>
 #include "Network.hpp"
 #include "Client.hpp"
+#include "Screen.hpp"
 #include "../common/Packet.hpp"
 
 namespace Client
 {
     Network::Network(Client& client) :
-        _socket(_ioService), _client(client)
+        _socket(_ioService), _client(client), _sendingData(false), _sendQueueSize(0)
     {
+    }
+
+    Network::~Network()
+    {
+        while (!this->_sendQueue.empty())
+        {
+            delete this->_sendQueue.front().first;
+            this->_sendQueue.pop();
+        }
+    }
+
+    unsigned int Network::GetSendQueueSize() const
+    {
+        return this->_sendQueueSize;
     }
 
     bool Network::Connect(std::string const& host, std::string const& port)
@@ -30,12 +45,13 @@ namespace Client
 
     bool Network::Tick()
     {
-        if (!this->_error.size())
+        if (this->_error.size())
             return false;
         try
         {
             this->_ioService.poll();
             this->_ioService.reset();
+            std::cout << "tick!" << std::endl;
         }
         catch (std::exception& e)
         {
@@ -47,8 +63,6 @@ namespace Client
 
     bool Network::Disconnect()
     {
-        if (!this->_error.size())
-            return false;
         try
         {
             this->_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
@@ -67,8 +81,65 @@ namespace Client
         return this->_error;
     }
 
+    bool Network::SendPacket(Common::Packet const& p)
+    {
+        char* copy = new char[p.GetCompleteSize()];
+        memcpy(copy, p.GetCompleteData(), p.GetCompleteSize());
+        this->_sendQueue.push(std::make_pair(copy, p.GetCompleteSize()));
+        this->_sendQueueSize += p.GetCompleteSize();
+        if (!this->_sendingData)
+        {
+            try
+            {
+                this->_sendingData = true;
+                this->_SendNextPacket();
+            }
+            catch (std::exception& e)
+            {
+                this->_error = e.what();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void Network::_SendNextPacket()
+    {
+        std::vector<boost::asio::const_buffer> buffers;
+        buffers.push_back(boost::asio::const_buffer(this->_sendQueue.front().first, this->_sendQueue.front().second));
+        boost::asio::async_write(this->_socket, buffers, boost::bind(&Network::_HandleWrite, this, boost::asio::placeholders::error));
+    }
+
+    void Network::_HandleWrite(boost::system::error_code const& error)
+    {
+        this->_sendQueueSize -= this->_sendQueue.front().second;
+        delete this->_sendQueue.front().first;
+        this->_sendQueue.pop();
+        if (error)
+            this->_error = error.message();
+        else if (this->_sendQueue.empty())
+            this->_sendingData = false;
+        else
+            this->_SendNextPacket();
+    }
+
     void Network::_ProcessPacket(Common::Packet& p)
     {
+        try
+        {
+            Common::Packet::Type type = static_cast<Common::Packet::Type>(p.ReadByte());
+            switch (type)
+            {
+                case Common::Packet::Tile:
+                    this->_client.GetScreen().ProcessTilePacket(p);
+                default:
+                    throw std::runtime_error("unknown packet type");
+            }
+        }
+        catch (std::exception& e)
+        {
+            this->_error = "Fatal exception on a received packet: \"" + std::string(e.what()) + "\".";
+        }
     }
 
     void Network::_ReceivePacketSize()

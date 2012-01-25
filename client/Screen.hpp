@@ -6,6 +6,11 @@
 #include <boost/noncopyable.hpp>
 #include "common/Color.hpp"
 
+namespace Common
+{
+    class Packet;
+}
+
 namespace Client
 {
     class Client;
@@ -18,6 +23,7 @@ namespace Client
             ~Screen();
             void DrawTile(unsigned int x, unsigned int y, unsigned char tile, Common::Color::Color fg, Common::Color::Color bg);
             void DrawText(unsigned int line, std::string const& text, Common::Color::Color fg, Common::Color::Color bg);
+            void ProcessTilePacket(Common::Packet& p);
         private:
             void _PopulateColors();
             void _PopulateBgShapes();
