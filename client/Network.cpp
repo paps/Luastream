@@ -3,6 +3,7 @@
 #include "Client.hpp"
 #include "Screen.hpp"
 #include "../common/Packet.hpp"
+#include "../common/Tile.hpp"
 
 namespace Client
 {
@@ -39,6 +40,7 @@ namespace Client
             this->_error = e.what();
             return false;
         }
+        this->_SayHello();
         this->_ReceivePacketSize();
         return true;
     }
@@ -101,6 +103,15 @@ namespace Client
             }
         }
         return true;
+    }
+
+    void Network::_SayHello()
+    {
+        Common::Packet p;
+        p.WriteInt(Common::Packet::ProtocolVersion);
+        p.WriteByte(Common::Tile::NbTileW);
+        p.WriteByte(Common::Tile::NbTileH);
+        this->SendPacket(p);
     }
 
     void Network::_SendNextPacket()

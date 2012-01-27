@@ -1,44 +1,38 @@
-#ifndef __CLIENT_NETWORK__
-#define __CLIENT_NETWORK__
+#ifndef __SERVER_CONNECTION__
+#define __SERVER_CONNECTION__
 
-#include <queue>
 #include <boost/asio.hpp>
-#include <boost/noncopyable.hpp>
+#include <queue>
 
 namespace Common
 {
     class Packet;
 }
 
-namespace Client
+namespace Server
 {
+    class Server;
     class Client;
 
-    class Network :
-        private boost::noncopyable
+    class Connection
     {
         public:
-            Network(Client& client);
-            ~Network();
-            bool Connect(std::string const& host, std::string const& port);
-            bool SendPacket(Common::Packet const& p);
+            Connection(Server& server, Client& client, boost::asio::ip::tcp::socket* socket);
+            ~Connection();
             unsigned int GetSendQueueSize() const;
-            bool Tick();
-            bool Disconnect();
-            std::string const& GetError() const;
+            bool SendPacket(Common::Packet const& p);
+            std::string GetName() const;
         private:
+            void _SendNextPacket();
+            void _HandleWrite(boost::system::error_code const& error);
             void _ProcessPacket(Common::Packet& p);
             void _ReceivePacketSize();
             void _HandleReceivePacketSize(boost::system::error_code const& error, unsigned int);
             void _ReceivePacketContent(unsigned int size);
             void _HandleReceivePacketContent(boost::system::error_code const& error, unsigned int);
-            void _SendNextPacket();
-            void _HandleWrite(boost::system::error_code const& error);
-            void _SayHello();
-            boost::asio::io_service _ioService;
-            boost::asio::ip::tcp::socket _socket;
-            std::string _error;
+            Server& _server;
             Client& _client;
+            boost::asio::ip::tcp::socket* _socket;
             std::vector<char> _buffer;
             std::queue< std::pair<char const*, unsigned int> > _sendQueue;
             bool _sendingData;

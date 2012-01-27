@@ -29,4 +29,5 @@ target_link_libraries(server
     ${LUA_LIBRARIES}
     ${LUABIND_LIBRARY}
     ${Boost_LIBRARIES}
+    "-lpthread"
 )

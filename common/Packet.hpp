@@ -5,6 +5,22 @@
 #include <boost/noncopyable.hpp>
 #include <cstdint>
 
+/*
+ * Protocol:
+ *
+ * - Hello (C -> S)
+ *   - int protocol version
+ *   - uchar screen width
+ *   - uchar screen height
+ *
+ * - Tile (S -> C)
+ *   - uchar x
+ *   - uchar y
+ *   - uchar type
+ *   - uchar color
+ *   - ...
+ */
+
 namespace Common
 {
     class Packet :
