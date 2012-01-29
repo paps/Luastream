@@ -81,6 +81,8 @@ namespace Client
             return false;
         }
         this->_zoom = 2;
+        if (ac >= 4)
+            this->_zoom = atof(av[3]) >= 0.1 && atof(av[3]) <= 10 ? atof(av[3]) : 2;
         sf::VideoMode m(Common::Tile::NbTileW * this->_tileW * this->_zoom, Common::Tile::NbTileH * this->_tileH * this->_zoom);
         this->_renderWindow = new sf::RenderWindow(m, "luastream", sf::Style::Close);
         this->_renderWindow->SetFramerateLimit(Framerate);

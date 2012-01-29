@@ -79,13 +79,16 @@ namespace Server
         try
         {
             Common::Packet::Type type = static_cast<Common::Packet::Type>(p.ReadByte());
-            switch (type)
-            {
-                case Common::Packet::Hello:
-                    this->_client.Hello(p);
-                default:
-                    throw std::runtime_error("unknown packet type");
-            }
+            if (type == Common::Packet::Hello)
+                this->_client.Hello(p);
+            else if (this->_client.IsAccepted())
+                switch (type)
+                {
+                    default:
+                        throw std::runtime_error("unknown packet type");
+                }
+            else
+                throw std::runtime_error("client not accepted");
         }
         catch (std::exception& e)
         {

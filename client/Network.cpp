@@ -143,6 +143,10 @@ namespace Client
             {
                 case Common::Packet::Tile:
                     this->_client.GetScreen().ProcessTilePacket(p);
+                    break;
+                case Common::Packet::Sync:
+                    this->_client.GetScreen().ProcessSyncPacket(p);
+                    break;
                 default:
                     throw std::runtime_error("unknown packet type");
             }

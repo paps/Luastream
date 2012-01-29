@@ -16,7 +16,7 @@ namespace Server
             void DeleteSocket(boost::asio::ip::tcp::socket* socket);
         private:
             void _AsyncAccept();
-            void _HandleAccept(boost::asio::ip::tcp::socket* socket, const boost::system::error_code& error);
+            void _HandleAccept(boost::asio::ip::tcp::socket* socket, boost::system::error_code const& error);
             Server& _server;
             boost::asio::ip::tcp::acceptor _acceptor;
     };

@@ -18,7 +18,7 @@ namespace Server
         this->_acceptor.async_accept(*socket, boost::bind(&Network::_HandleAccept, this, socket, boost::asio::placeholders::error));
     }
 
-    void Network::_HandleAccept(boost::asio::ip::tcp::socket* socket, const boost::system::error_code& error)
+    void Network::_HandleAccept(boost::asio::ip::tcp::socket* socket, boost::system::error_code const& error)
     {
         if (error)
         {

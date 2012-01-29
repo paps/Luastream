@@ -1,12 +1,17 @@
 #include <boost/cstdlib.hpp>
+#include <boost/bind.hpp>
 #include "Server.hpp"
 #include "Network.hpp"
 #include "Client.hpp"
 
 namespace Server
 {
-    int Server::Run(int ac, char** av) :
+    Server::Server() :
         _tickTimer(_ioService)
+    {
+    }
+
+    int Server::Run(int ac, char** av)
     {
         if (!this->_Init(ac, av))
             return boost::exit_failure;
@@ -31,7 +36,7 @@ namespace Server
         this->_clients.push_back(client);
     }
 
-    void Server::DeleteClients()
+    void Server::_DeleteClients()
     {
         std::list<Client*>::iterator it = this->_clientsKillPool.begin();
         std::list<Client*>::iterator itEnd = this->_clientsKillPool.end();
@@ -63,13 +68,22 @@ namespace Server
         return this->_clients;
     }
 
-    void Server::_Tick()
+    void Server::_Tick(boost::system::error_code const& error)
     {
+        if (error)
+            return;
+        this->_DeleteClients();
+        std::list<Client*>::iterator it = this->_clients.begin();
+        std::list<Client*>::iterator itEnd = this->_clients.end();
+        for (; it != itEnd; ++it)
+            (*it)->Tick();
         this->_AsyncTick();
     }
 
     void Server::_AsyncTick()
     {
+        this->_tickTimer.expires_from_now(boost::posix_time::milliseconds(TickRate));
+        this->_tickTimer.async_wait(boost::bind(&Server::_Tick, this, boost::asio::placeholders::error));
     }
 
     bool Server::_Init(int ac, char** av)

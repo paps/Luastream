@@ -28,9 +28,22 @@ namespace Client
             unsigned int x = p.ReadByte();
             unsigned int y = p.ReadByte();
             unsigned char type = p.ReadByte();
-            unsigned char color = p.ReadByte();
-            this->DrawTile(x, y, type, Common::Color::ReadFgColor(color), Common::Color::ReadBgColor(color));
+            unsigned char colors = p.ReadByte();
+            this->DrawTile(x, y, type, Common::Color::ReadFgColor(colors), Common::Color::ReadBgColor(colors));
         }
+    }
+
+    void Screen::ProcessSyncPacket(Common::Packet& p)
+    {
+        unsigned char type;
+        unsigned char colors;
+        for (unsigned int y = 0; y < Common::Tile::NbTileH; ++y)
+            for (unsigned int x = 0; x < Common::Tile::NbTileW; ++x)
+            {
+                type = p.ReadByte();
+                colors = p.ReadByte();
+                this->DrawTile(x, y, type, Common::Color::ReadFgColor(colors), Common::Color::ReadBgColor(colors));
+            }
     }
 
     void Screen::DrawText(unsigned int line, std::string const& text, Common::Color::Color fg, Common::Color::Color bg)

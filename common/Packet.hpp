@@ -9,16 +9,24 @@
  * Protocol:
  *
  * - Hello (C -> S)
+ *   - uchar 0
  *   - int protocol version
  *   - uchar screen width
  *   - uchar screen height
  *
  * - Tile (S -> C)
- *   - uchar x
- *   - uchar y
- *   - uchar type
- *   - uchar color
- *   - ...
+ *   - uchar 1
+ *   - repeated:
+ *     - uchar x
+ *     - uchar y
+ *     - uchar type
+ *     - uchar colors
+ *
+ * - Sync (S -> C)
+ *   - uchar 2
+ *   - repeated (y = i/NbTileW, x = i-y*NbTileW):
+ *     - uchar type
+ *     - uchar colors
  */
 
 namespace Common
@@ -35,6 +43,7 @@ namespace Common
             {
                 Hello = 0,
                 Tile = 1,
+                Sync = 2,
             };
             Packet();
             ~Packet();

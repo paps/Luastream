@@ -24,6 +24,7 @@ namespace Client
             void DrawTile(unsigned int x, unsigned int y, unsigned char tile, Common::Color::Color fg, Common::Color::Color bg);
             void DrawText(unsigned int line, std::string const& text, Common::Color::Color fg, Common::Color::Color bg);
             void ProcessTilePacket(Common::Packet& p);
+            void ProcessSyncPacket(Common::Packet& p);
         private:
             void _PopulateColors();
             void _PopulateBgShapes();
